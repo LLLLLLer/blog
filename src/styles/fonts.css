@@ -1,0 +1,25 @@
+/*
+ * 得意黑 Smiley Sans —— SIL OFL 1.1，可免费商用、允许网络嵌入、无需署名。
+ * 来源: https://github.com/atelier-anchor/smiley-sans
+ * 这里加载的是构建期生成的子集（见 scripts/subset-font.mjs），完整字体是 1.1MB。
+ */
+@font-face {
+  font-family: 'Smiley Sans';
+  src: url('/fonts/smiley-sans-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  /* 正文系统字体立即可读，标题字体到位后再替换，不阻塞首屏 */
+  font-display: swap;
+}
+
+:root {
+  /* 标题：得意黑。缺字时优雅退回系统字体（得意黑只覆盖 GB2312 常用字 6767 个） */
+  --font-display: 'Smiley Sans', var(--font-sans);
+
+  /* 正文：纯系统字体栈，0 字节 */
+  --font-sans: system-ui, -apple-system, 'PingFang SC', 'HarmonyOS Sans SC',
+    'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans CJK SC', sans-serif;
+  --font-serif: 'Songti SC', 'Source Han Serif SC', 'Noto Serif CJK SC', Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas,
+    'PingFang SC', monospace;
+}

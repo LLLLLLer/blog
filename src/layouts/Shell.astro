@@ -1,0 +1,140 @@
+---
+import Base from './Base.astro';
+import { SITE, SECTIONS, SOCIALS } from '../config';
+import { getTheme } from '../themes';
+import ColorToggle from '../components/ui/ColorToggle.astro';
+import CursorGlow from '../components/ui/CursorGlow.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  theme: 'a' | 'b' | 'c';
+  /** 当前分区，用于导航高亮 */
+  active?: string;
+  /** 首页不需要外层容器约束 */
+  bare?: boolean;
+}
+
+const { title, description, theme, active, bare = false } = Astro.props;
+const meta = getTheme(theme)!;
+---
+
+<Base title={title} description={description} theme={theme}>
+  {theme === 'b' && <CursorGlow />}
+
+  <a href="#main" class="skip-link">跳到正文</a>
+
+  <header class="site-header">
+    <div class="shell-inner site-header__inner">
+      <a href={`/${theme}`} class="brand">{SITE.title}</a>
+      <nav class="nav" aria-label="主导航">
+        {SECTIONS.map((s) => (
+          <a
+            href={`/${theme}/${s.id}`}
+            class="nav-link"
+            data-active={active === s.id ? '' : undefined}
+          >
+            {s.name}
+          </a>
+        ))}
+        <a href={`/${theme}/search`} class="nav-link" data-active={active === 'search' ? '' : undefined}>
+          搜索
+        </a>
+        {meta.hasColorToggle && <ColorToggle />}
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class={bare ? '' : 'shell-inner shell-main'}>
+    <slot />
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell-inner site-footer__inner">
+      <p>© {new Date().getFullYear()} {SITE.author}</p>
+      <p class="site-footer__links">
+        {SOCIALS.map((s) => <a href={s.href}>{s.name}</a>)}
+        <a href="/rss.xml">RSS</a>
+        <a href="/" class="site-footer__switch">切换候选 →</a>
+      </p>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  .shell-inner {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  .shell-main {
+    padding-block: 3rem 5rem;
+    min-height: 60vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    padding: 0.6rem 1rem;
+    background: var(--accent);
+    color: var(--bg);
+    z-index: 100;
+  }
+  .skip-link:focus { left: 0; }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 3.75rem;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--fg);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    font-size: 0.875rem;
+  }
+  .nav-link {
+    color: var(--fg-muted);
+    transition: color var(--motion-fast) var(--ease-out);
+  }
+  .nav-link:hover { color: var(--fg); }
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding-block: 2rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    position: relative;
+    z-index: 1;
+  }
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    justify-content: space-between;
+  }
+  .site-footer__links { display: flex; gap: 1rem; }
+  .site-footer__links a { transition: color var(--motion-fast) var(--ease-out); }
+  .site-footer__links a:hover { color: var(--accent); }
+  .site-footer__switch { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .site-header__inner { height: auto; padding-block: 0.75rem; flex-wrap: wrap; }
+    .nav { gap: 0.85rem; font-size: 0.8rem; }
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import { render } from 'astro:content';
+import Shell from '../../../layouts/Shell.astro';
+import { THEME_IDS } from '../../../themes';
+import { getWorks } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const works = await getWorks();
+  return THEME_IDS.flatMap((theme) =>
+    works.map((entry) => ({ params: { theme, slug: entry.id }, props: { entry } })),
+  );
+}
+
+const { entry } = Astro.props;
+const { theme } = Astro.params;
+const { Content } = await render(entry);
+---
+
+<Shell title={entry.data.title} description={entry.data.description} theme={theme as 'a' | 'b' | 'c'} active="works">
+  <article>
+    <h1 class="work-title">{entry.data.title}</h1>
+    <p class="work-meta">
+      {entry.data.year}
+      {entry.data.role && <span> · {entry.data.role}</span>}
+    </p>
+    <p class="work-links">
+      {entry.data.link && <a href={entry.data.link}>访问 ↗</a>}
+      {entry.data.repo && <a href={entry.data.repo}>源码 ↗</a>}
+    </p>
+    <div class="prose"><Content /></div>
+  </article>
+</Shell>
+
+<style>
+  .work-title { font-size: clamp(1.75rem, 4.5vw, 2.5rem); }
+  .work-meta { color: var(--fg-muted); font-size: 0.8rem; margin-top: 0.6rem; }
+  .work-links { display: flex; gap: 1.25rem; margin: 1rem 0 2.5rem; font-size: 0.875rem; }
+  .work-links a { color: var(--accent); }
+</style>

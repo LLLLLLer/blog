@@ -1,0 +1,155 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { SITE, ANALYTICS } from '../config';
+import { getTheme } from '../themes';
+import '../styles/base.css';
+import '../themes/a/theme.css';
+import '../themes/b/theme.css';
+import '../themes/c/theme.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** 未传时为候选选择页，用中性配色 */
+  theme?: 'a' | 'b' | 'c';
+  ogImage?: string;
+}
+
+const { title, description = SITE.description, theme, ogImage } = Astro.props;
+const meta = theme ? getTheme(theme) : undefined;
+const fullTitle = title === SITE.title ? title : `${title} · ${SITE.title}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={SITE.lang} data-theme={theme ?? 'neutral'} class={meta && !meta.hasColorToggle ? 'dark' : ''}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
+
+    <!-- 标题字体是首屏可见元素，提前建连 -->
+    <link rel="preload" href="/fonts/smiley-sans-subset.woff2" as="font" type="font/woff2" crossorigin />
+
+    {/* 明暗模式在 body 渲染前定好，避免刷新时闪一下白 */}
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        if (root.dataset.theme === 'b') return; // B 是暗色原生，不参与切换
+        const saved = localStorage.getItem('color-scheme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        root.classList.toggle('dark', dark);
+      })();
+    </script>
+
+    <ClientRouter />
+
+    {ANALYTICS.cfBeaconToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${ANALYTICS.cfBeaconToken}"}`}
+      />
+    )}
+  </head>
+  <body>
+    <slot />
+    <script>
+      import '../lib/client/enhance';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  /* 页面切换过渡。跨文档 View Transitions 目前 Chromium + Safari 18.2+ 原生支持，
+     Firefox 跨文档尚未完成；ClientRouter 在这些浏览器上用客户端路由补齐，
+     再不济就是普通跳转，不会报错也不会闪白。 */
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: vt-fade-out var(--motion-base) var(--ease-out) both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in var(--motion-base) var(--ease-out) both;
+  }
+
+  @keyframes vt-fade-out {
+    to { opacity: 0; transform: translateY(calc(var(--reveal-shift) * -0.5)); }
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; transform: translateY(var(--reveal-shift)); }
+  }
+
+  /* 滚动进场 */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(var(--reveal-shift));
+    transition: opacity var(--motion-slow) var(--ease-out),
+      transform var(--motion-slow) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 代码块复制按钮 */
+  .code-block { position: relative; }
+  .code-copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.7rem;
+    font-family: var(--font-sans);
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out);
+  }
+  .code-block:hover .code-copy,
+  .code-copy:focus-visible { opacity: 1; }
+  .code-copy:hover { color: var(--accent); }
+
+  /* 图片放大 */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: none;
+    place-items: center;
+    padding: 5vmin;
+    background: color-mix(in oklab, var(--bg) 88%, black);
+    backdrop-filter: blur(6px);
+    cursor: zoom-out;
+  }
+  .lightbox[data-open] {
+    display: grid;
+    animation: vt-fade-in var(--motion-base) var(--ease-out) both;
+  }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--radius);
+  }
+
+  .mermaid { background: transparent !important; border: none !important; text-align: center; }
+</style>

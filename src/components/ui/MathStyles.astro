@@ -1,0 +1,12 @@
+---
+/**
+ * KaTeX 样式表约 23KB，只有文章页可能有公式，
+ * 放在这里而不是全局，首页/列表/搜索页就不用背着它。
+ */
+import 'katex/dist/katex.min.css';
+---
+
+<style is:global>
+  /* 长公式在窄屏上自己横向滚，不撑破页面 */
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; }
+</style>

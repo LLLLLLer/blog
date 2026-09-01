@@ -1,0 +1,49 @@
+---
+/** 明暗切换。候选 B 是暗色原生，不渲染这个。 */
+---
+<button type="button" class="color-toggle" data-color-toggle aria-label="切换明暗模式">
+  <span class="color-toggle__icon" aria-hidden="true"></span>
+</button>
+
+<script>
+  function bind() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-color-toggle]');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const dark = root.classList.toggle('dark');
+      localStorage.setItem('color-scheme', dark ? 'dark' : 'light');
+    });
+  }
+  document.addEventListener('astro:page-load', bind);
+</script>
+
+<style>
+  .color-toggle {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--ease-out);
+  }
+  .color-toggle:hover { border-color: var(--accent); }
+  .color-toggle__icon {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    background: var(--fg-muted);
+    /* 亮色时是实心点，暗色时挖成月牙 */
+    box-shadow: inset -3px -1px 0 0 var(--bg);
+    transition: box-shadow var(--motion-base) var(--ease-out),
+      background var(--motion-base) var(--ease-out);
+  }
+  :global(html:not(.dark)) .color-toggle__icon {
+    box-shadow: none;
+    background: var(--accent);
+  }
+</style>

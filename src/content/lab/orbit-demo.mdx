@@ -1,0 +1,46 @@
+---
+title: 双体轨道：拖一下引力源
+description: 一个可交互 demo，顺便说明 demo 容器该替你干掉哪些样板。
+pubDate: 2026-08-30
+tags: [可视化, canvas, 物理]
+hasDemo: true
+---
+
+import DemoCanvas from '../../components/demo/DemoCanvas.astro';
+
+有些东西说不清楚，得自己动手拨一下。
+
+<DemoCanvas demo="orbit" title="双体轨道" note="拖动中间那个黑点，看轨道怎么变形。" height={340} />
+
+## 容器替你干了什么
+
+自己在文章里塞 canvas，每次都要重写同一批样板：
+
+- **DPR 缩放** —— 不处理的话在高分屏上糊成一片
+- **resize** —— 容器宽度变了要重算
+- **滚出视口暂停** —— 否则你读到文章末尾时，前面三个 demo 还在后台空转烧电
+- **降级** —— `prefers-reduced-motion` 下应该画一帧静态图，而不是硬跑动画
+- **卸载** —— 客户端路由换页时不解绑，rAF 和事件监听会一直挂着
+
+这些跟你想演示的东西一点关系都没有。所以它们全在容器里，写 demo 只管画：
+
+```ts
+const setup: DemoSetup = ({ ctx, width, height, reducedMotion }) => {
+  return {
+    frame() {
+      // 只管画。什么时候调、调不调，容器决定
+    },
+    reset() { /* 点「重置」时 */ },
+  };
+};
+```
+
+## 运动方程
+
+引力加速度按平方反比，为了避免距离趋零时数值爆掉，加了个下限 $r_{\min}$：
+
+$$
+\vec{a} = \frac{GM}{\max(r, r_{\min})^{2}} \hat{r}
+$$
+
+积分用最朴素的显式欧拉。它会缓慢累积能量误差，轨道慢慢外扩——**对演示来说这不是 bug，是特征**：它让轨迹画出好看的花瓣，而不是一圈盖一圈。真要做物理仿真就得换 Verlet 了。

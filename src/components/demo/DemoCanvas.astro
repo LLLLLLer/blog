@@ -1,0 +1,205 @@
+---
+/**
+ * 可复用的交互 demo 容器。
+ *
+ * 用法（md/mdx 里一行）：
+ *   <DemoCanvas demo="orbit" title="双体轨道" note="拖动中心的点试试" />
+ *
+ * demo 模块放在 src/demos/<name>.ts，默认导出 DemoSetup。
+ * 容器负责：按需加载、DPR 缩放、resize、滚出视口暂停 rAF、降级、重置。
+ */
+interface Props {
+  /** src/demos/ 下的文件名（不含扩展名） */
+  demo: string;
+  title?: string;
+  note?: string;
+  /** 画布高度（CSS px），窄屏会自动压缩 */
+  height?: number;
+}
+
+const { demo, title, note, height = 320 } = Astro.props;
+---
+
+<figure class="demo" data-demo={demo} style={`--demo-height:${height}px`}>
+  <div class="demo__bar">
+    <span class="demo__title">{title ?? '交互演示'}</span>
+    <button type="button" class="demo__reset" data-demo-reset>重置</button>
+  </div>
+  <div class="demo__stage">
+    <canvas data-demo-canvas></canvas>
+    <noscript><p class="demo__fallback">这个演示需要 JavaScript。</p></noscript>
+  </div>
+  {note && <figcaption class="demo__note">{note}</figcaption>}
+</figure>
+
+<script>
+  import type { DemoSetup, DemoInstance } from '../../lib/demo-runtime';
+
+  // Vite 需要静态可分析的 glob，不能用变量做动态 import 路径
+  const modules = import.meta.glob<{ default: DemoSetup }>('../../demos/*.ts');
+
+  function mount(root: HTMLElement) {
+    if (root.hasAttribute('data-demo-ready')) return;
+    root.setAttribute('data-demo-ready', '');
+
+    const name = root.dataset.demo;
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-demo-canvas]');
+    const resetBtn = root.querySelector<HTMLButtonElement>('[data-demo-reset]');
+    if (!name || !canvas) return;
+
+    const loader = modules[`../../demos/${name}.ts`];
+    if (!loader) {
+      console.warn(`[demo] 找不到 src/demos/${name}.ts`);
+      return;
+    }
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let instance: DemoInstance | null = null;
+    let raf = 0;
+    let running = false;
+    const start = performance.now();
+
+    const sizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      const ctx = canvas.getContext('2d')!;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    };
+
+    const loop = () => {
+      if (!running || !instance) return;
+      instance.frame?.(performance.now() - start);
+      raf = requestAnimationFrame(loop);
+    };
+
+    const play = () => {
+      if (running || !instance) return;
+      running = true;
+      // 降级模式下不进 rAF 循环，只画一帧静态结果
+      if (reducedMotion) instance.frame?.(0);
+      else raf = requestAnimationFrame(loop);
+    };
+
+    const pause = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // 滚动到才加载模块，滚出视口就停掉 rAF —— demo 不该在你读别处时空转烧电
+    const io = new IntersectionObserver(
+      async (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (!instance) {
+              const { ctx, width, height } = sizeCanvas();
+              const setup = (await loader()).default;
+              instance = setup({ canvas, ctx, width, height, reducedMotion });
+            }
+            play();
+          } else {
+            pause();
+          }
+        }
+      },
+      { rootMargin: '120px' },
+    );
+    io.observe(root);
+
+    const ro = new ResizeObserver(() => {
+      if (!instance) return;
+      const { width, height } = sizeCanvas();
+      instance.resize?.(width, height);
+      if (reducedMotion || !running) instance.frame?.(0);
+    });
+    ro.observe(canvas);
+
+    resetBtn?.addEventListener('click', () => {
+      instance?.reset?.();
+      if (reducedMotion || !running) instance?.frame?.(0);
+    });
+
+    // 客户端路由换页时把资源收干净，否则 rAF 和事件会一直挂着
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        pause();
+        io.disconnect();
+        ro.disconnect();
+        instance?.destroy?.();
+        instance = null;
+      },
+      { once: true },
+    );
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-demo]').forEach(mount);
+  });
+</script>
+
+<style>
+  .demo {
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-subtle);
+  }
+  .demo__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+  .demo__title {
+    font-family: var(--font-display);
+    color: var(--fg-muted);
+  }
+  .demo__reset {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--fg-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+  .demo__reset:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .demo__stage {
+    height: var(--demo-height);
+    position: relative;
+  }
+  .demo__stage canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+  .demo__fallback,
+  .demo__note {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+  .demo__note {
+    border-top: 1px solid var(--border);
+  }
+
+  /* 窄屏压低画布高度，避免一个 demo 占满整屏 */
+  @media (max-width: 767px) {
+    .demo__stage {
+      height: min(var(--demo-height), 60vw);
+    }
+  }
+</style>

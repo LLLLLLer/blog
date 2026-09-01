@@ -1,0 +1,60 @@
+---
+import Shell from '../../../layouts/Shell.astro';
+import { THEME_IDS } from '../../../themes';
+import { getWorks } from '../../../lib/content';
+
+export const getStaticPaths = () => THEME_IDS.map((theme) => ({ params: { theme } }));
+
+const { theme } = Astro.params;
+const works = await getWorks();
+---
+
+<Shell title="作品" description="做过的东西" theme={theme as 'a' | 'b' | 'c'} active="works">
+  <header class="section-head">
+    <h1 class="section-head__title">作品</h1>
+    <p class="section-head__desc">做过的东西</p>
+  </header>
+
+  {works.length === 0 ? (
+    <p class="works-empty">
+      还没有放上来的作品。<br />
+      往 <code>src/content/works/</code> 里加 md 文件即可，首页的精选项目区会自动出现。
+    </p>
+  ) : (
+    <ul class="works">
+      {works.map((w, i) => (
+        <li class="card work" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 50}ms`}>
+          <div class="work__head">
+            <a href={`/${theme}/works/${w.id}`} class="work__title">{w.data.title}</a>
+            <span class="work__year">{w.data.year}</span>
+          </div>
+          <p class="work__desc">{w.data.description}</p>
+          <p class="work__links">
+            {w.data.role && <span>{w.data.role}</span>}
+            {w.data.link && <a href={w.data.link}>访问</a>}
+            {w.data.repo && <a href={w.data.repo}>源码</a>}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+</Shell>
+
+<style>
+  .section-head { margin-bottom: 2.5rem; }
+  .section-head__title { font-size: clamp(1.75rem, 5vw, 2.75rem); }
+  .section-head__desc { color: var(--fg-muted); margin-top: 0.5rem; }
+  .works-empty { color: var(--fg-muted); line-height: 2; padding-block: 2rem; }
+  .works-empty code { font-family: var(--font-mono); font-size: 0.9em; }
+
+  .works { display: grid; gap: 0.75rem; }
+  .work { padding: 1.25rem; border-radius: var(--radius); }
+  .work:not(:where([data-theme='b'] *)) { border: 1px solid var(--border); }
+  .work__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .work__title { font-family: var(--font-display); font-size: 1.2rem; color: var(--fg); }
+  .work__title:hover { color: var(--accent); }
+  .work__year { color: var(--fg-muted); font-size: 0.8rem; }
+  .work__desc { color: var(--fg-muted); font-size: 0.9rem; margin-top: 0.4rem; }
+  .work__links { display: flex; gap: 1rem; font-size: 0.8rem; margin-top: 0.7rem; color: var(--fg-muted); }
+  .work__links a { color: var(--accent); }
+</style>

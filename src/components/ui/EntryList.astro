@@ -1,0 +1,97 @@
+---
+import { formatDate } from '../../lib/content';
+import type { AnyEntry, WritingSection } from '../../lib/content';
+
+interface Props {
+  theme: string;
+  items: { section: WritingSection; entry: AnyEntry }[];
+  /** 候选 C 用序号栅格，其余用普通卡片 */
+  variant?: 'rows' | 'cards';
+  showSection?: boolean;
+  empty?: string;
+}
+
+const {
+  theme,
+  items,
+  variant = 'cards',
+  showSection = false,
+  empty = '这个分区还没有内容。',
+} = Astro.props;
+
+const SECTION_LABEL: Record<WritingSection, string> = {
+  posts: '技术',
+  lab: '实验',
+  notes: '随笔',
+};
+---
+
+{items.length === 0 ? (
+  <p class="entry-empty">{empty}</p>
+) : variant === 'rows' ? (
+  <ol class="entry-rows">
+    {items.map(({ section, entry }, i) => (
+      <li class="entry-row" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 40}ms`}>
+        <span class="entry-row__index">{String(i + 1).padStart(2, '0')}</span>
+        <div>
+          <a href={`/${theme}/${section}/${entry.id}`} class="entry-row__title">{entry.data.title}</a>
+          {entry.data.description && <p class="entry-desc">{entry.data.description}</p>}
+          <p class="entry-meta">
+            <time datetime={entry.data.pubDate.toISOString()}>{formatDate(entry.data.pubDate)}</time>
+            {showSection && <span> · {SECTION_LABEL[section]}</span>}
+          </p>
+        </div>
+      </li>
+    ))}
+  </ol>
+) : (
+  <ul class="entry-cards">
+    {items.map(({ section, entry }, i) => (
+      <li class="card entry-card" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 40}ms`}>
+        <a href={`/${theme}/${section}/${entry.id}`} class="entry-card__title">{entry.data.title}</a>
+        {entry.data.description && <p class="entry-desc">{entry.data.description}</p>}
+        <p class="entry-meta">
+          <time datetime={entry.data.pubDate.toISOString()}>{formatDate(entry.data.pubDate)}</time>
+          {showSection && <span> · {SECTION_LABEL[section]}</span>}
+          {entry.data.tags.length > 0 && <span> · {entry.data.tags.join(' / ')}</span>}
+        </p>
+      </li>
+    ))}
+  </ul>
+)}
+
+<style>
+  .entry-empty { color: var(--fg-muted); padding-block: 2rem; }
+
+  .entry-cards { display: grid; gap: 0.5rem; }
+  .entry-card { padding: 1.1rem 1.15rem; border-radius: var(--radius); }
+  /* 非 B 候选没有 .card 的毛玻璃样式，这里给个通用底 */
+  .entry-card:not(:where([data-theme='b'] *)) {
+    border: 1px solid var(--border);
+    transition: border-color var(--motion-base) var(--ease-out);
+  }
+  .entry-card:not(:where([data-theme='b'] *)):hover { border-color: var(--accent); }
+
+  .entry-card__title,
+  .entry-row__title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--fg);
+    transition: color var(--motion-fast) var(--ease-out);
+  }
+  .entry-card__title:hover,
+  .entry-row__title:hover { color: var(--accent); }
+
+  .entry-row__title { font-size: 1.4rem; display: inline-block; }
+
+  .entry-desc {
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+  .entry-meta {
+    color: var(--fg-muted);
+    font-size: 0.775rem;
+    margin-top: 0.45rem;
+  }
+</style>

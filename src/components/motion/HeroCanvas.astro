@@ -1,0 +1,118 @@
+---
+/**
+ * 首页视觉引子。
+ *
+ * 只在首页出现，不进全站。挂 data-heavy-motion，窄屏和 prefers-reduced-motion 下
+ * 整体不渲染（见 base.css），页面照常可读。
+ * 颜色取自当前主题的 --accent，三个候选会自动呈现不同气质。
+ */
+interface Props {
+  /** 线条密度；候选之间用这个拉开视觉分量 */
+  density?: number;
+  height?: string;
+}
+const { density = 26, height = '100%' } = Astro.props;
+---
+
+<canvas class="hero-canvas" data-heavy-motion data-hero-canvas data-density={density} style={`height:${height}`} aria-hidden="true"></canvas>
+
+<script>
+  function init() {
+    const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+    if (!canvas || canvas.dataset.ready) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(max-width: 767px)').matches) return;
+    canvas.dataset.ready = '1';
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const density = Number(canvas.dataset.density ?? 26);
+    let w = 0;
+    let h = 0;
+    let raf = 0;
+    let running = false;
+
+    const accent = () =>
+      getComputedStyle(canvas).getPropertyValue('--accent').trim() || '#888';
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    // 缓慢漂移的线场：没有粒子连线那种密集运算，每帧只画 density 条曲线
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = accent();
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < density; i++) {
+        const p = i / density;
+        const phase = t * 0.00012 + p * 5.2;
+        ctx.globalAlpha = 0.05 + 0.09 * Math.sin(phase) ** 2;
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 14) {
+          const y =
+            h * p +
+            Math.sin(x * 0.006 + phase) * 18 +
+            Math.sin(x * 0.013 - phase * 1.7) * 9;
+          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    const loop = (t: number) => {
+      if (!running) return;
+      draw(t);
+      raf = requestAnimationFrame(loop);
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting && !running) {
+          running = true;
+          raf = requestAnimationFrame(loop);
+        } else if (!e.isIntersecting && running) {
+          running = false;
+          cancelAnimationFrame(raf);
+        }
+      }
+    });
+
+    const ro = new ResizeObserver(resize);
+    resize();
+    io.observe(canvas);
+    ro.observe(canvas);
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        running = false;
+        cancelAnimationFrame(raf);
+        io.disconnect();
+        ro.disconnect();
+      },
+      { once: true },
+    );
+  }
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    display: block;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>

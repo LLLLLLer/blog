@@ -1,0 +1,38 @@
+/* 候选 A —— 极简亮色阅读向
+ * 取向：留白、克制、字体讲究。动效只在必要处出现，不主动引起注意。 */
+[data-theme='a'] {
+  --bg: #fdfcfa;
+  --bg-subtle: #f3f1ec;
+  --fg: #23201c;
+  --fg-muted: #7a736a;
+  --border: #e4e0d8;
+  --accent: #b4573b;
+
+  --content-width: 40rem;
+  --radius: 6px;
+  --reveal-shift: 8px;
+  --motion-slow: 320ms;
+}
+
+[data-theme='a'].dark {
+  --bg: #161513;
+  --bg-subtle: #201e1b;
+  --fg: #e9e5dd;
+  --fg-muted: #9c9488;
+  --border: #302d29;
+  --accent: #e08e6f;
+}
+
+/* 正文用衬线，是这个候选最明显的性格 */
+[data-theme='a'] .prose {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+}
+
+[data-theme='a'] .site-header {
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme='a'] .nav-link[data-active] {
+  color: var(--accent);
+}

@@ -1,0 +1,12 @@
+# Cloudflare Pages 缓存策略
+# 带内容哈希的产物可以永久缓存
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 字体子集文件名不带哈希，但内容变化时 HTML 会重新引用，给一天
+/fonts/*
+  Cache-Control: public, max-age=86400
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

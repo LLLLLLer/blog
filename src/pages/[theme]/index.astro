@@ -1,0 +1,33 @@
+---
+import Shell from '../../layouts/Shell.astro';
+import HomeA from '../../themes/a/Home.astro';
+import HomeB from '../../themes/b/Home.astro';
+import HomeC from '../../themes/c/Home.astro';
+import { THEME_IDS } from '../../themes';
+import { getAllWriting, getWorks } from '../../lib/content';
+import { SITE } from '../../config';
+
+export const getStaticPaths = () => THEME_IDS.map((theme) => ({ params: { theme } }));
+
+const { theme } = Astro.params;
+const items = (await getAllWriting()).slice(0, 8);
+// 只在首页展示精选；用户暂无作品时这一块整体不渲染
+const works = (await getWorks()).filter((w) => w.data.featured).slice(0, 4);
+
+const HOMES = { a: HomeA, b: HomeB, c: HomeC } as const;
+const Home = HOMES[theme as keyof typeof HOMES];
+---
+
+<Shell title={SITE.title} theme={theme as 'a' | 'b' | 'c'} bare>
+  <div class="home-inner">
+    <Home items={items} works={works} />
+  </div>
+</Shell>
+
+<style>
+  .home-inner {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding: 0 1.25rem 5rem;
+  }
+</style>

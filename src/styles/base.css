@@ -1,0 +1,178 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/* ---------------------------------------------------------------------------
+ * 动效令牌。三个视觉候选通过覆盖这几个变量来调整动效强度，
+ * 组件本身不写死时长和缓动。
+ * ------------------------------------------------------------------------- */
+:root {
+  --motion-fast: 120ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* 进场位移距离；降级时被置 0 */
+  --reveal-shift: 12px;
+
+  --content-width: 44rem;
+  --radius: 10px;
+
+  /* 中性配色：候选选择页用，也是三个主题都没加载时的兜底 */
+  --bg: #ffffff;
+  --bg-subtle: #f4f4f5;
+  --fg: #18181b;
+  --fg-muted: #71717a;
+  --border: #e4e4e7;
+  --accent: #2563eb;
+}
+
+/* 只作用于候选选择页。不加 [data-theme='neutral'] 的话 html.dark(0,1,1)
+   会盖过候选 B 的 [data-theme='b'](0,1,0)，B 的配色整套失效。 */
+html.dark[data-theme='neutral'] {
+  --bg: #0b0b0d;
+  --bg-subtle: #17171a;
+  --fg: #e8e8ea;
+  --fg-muted: #a1a1aa;
+  --border: #27272a;
+  --accent: #60a5fa;
+}
+
+/* ---------------------------------------------------------------------------
+ * 统一降级开关 —— 用户选的「平衡降级」落在这一处。
+ * 1) 系统开启「减弱动态效果」 2) 窄屏（移动端）
+ * 两种情况都把非必要动效整体关掉，而不是逐个组件去判断。
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+    --reveal-shift: 0px;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* 移动端：保留轻量过渡，关掉位移进场和重特效（辉光、视差、光标跟随） */
+@media (max-width: 767px) {
+  :root {
+    --reveal-shift: 0px;
+    --motion-slow: var(--motion-base);
+  }
+  [data-heavy-motion] {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 基础排版：按中文正文调，不是照搬英文站的行高
+ * ------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  /* 目录锚点跳转时不要贴到顶栏底下 */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--fg);
+  /* 中文正文行高要比英文站高，1.5 在中文里挤得难受 */
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--motion-base) var(--ease-out),
+    color var(--motion-base) var(--ease-out);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.35;
+  font-weight: 400;
+  /* 得意黑本身是窄斜的美术字，字距不用再收 */
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+ * 正文内容区
+ * ------------------------------------------------------------------------- */
+.prose {
+  max-width: var(--content-width);
+}
+.prose > * + * { margin-top: 1.15em; }
+.prose h2 { margin-top: 2.2em; font-size: 1.5rem; }
+.prose h3 { margin-top: 1.8em; font-size: 1.2rem; }
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+.prose a:hover { opacity: 0.7; }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li + li { margin-top: 0.4em; }
+.prose blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1em;
+  color: var(--fg-muted);
+}
+.prose img { border-radius: var(--radius); }
+.prose code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bg-subtle);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+.prose pre {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  border: 1px solid var(--border);
+}
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.925rem; }
+.prose th, .prose td { border: 1px solid var(--border); padding: 0.5em 0.75em; }
+.prose th { background: var(--bg-subtle); }
+
+/* 宽内容（表格、代码块、图表）自己横向滚动，页面本身永远不横向滚 */
+.prose > pre,
+.prose > table,
+.prose .mermaid {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Shiki 双主题：跟随站点明暗切换 */
+html.dark .astro-code,
+html.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
