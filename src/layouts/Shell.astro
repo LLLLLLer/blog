@@ -24,7 +24,10 @@ const meta = getTheme(theme)!;
 
   <a href="#main" class="skip-link">跳到正文</a>
 
-  <header class="site-header">
+  {/* 页面顶端的哨兵：它滚出视口即代表「已滚动」，比监听 scroll 事件省 */}
+  <div data-scroll-sentinel aria-hidden="true"></div>
+
+  <header class="site-header" data-site-header>
     <div class="shell-inner site-header__inner">
       <a href={`/${theme}`} class="brand">{SITE.title}</a>
       <nav class="nav" aria-label="主导航">
@@ -85,10 +88,23 @@ const meta = getTheme(theme)!;
   }
   .skip-link:focus { left: 0; }
 
+  [data-scroll-sentinel] {
+    position: absolute;
+    top: 0;
+    height: 1px;
+    width: 1px;
+    pointer-events: none;
+  }
+
   .site-header {
     position: sticky;
     top: 0;
     z-index: 20;
+    /* 实色背景，不能依赖 JS —— sticky 顶栏透明会让正文从底下透上来。
+       候选 B 会把它覆盖成毛玻璃，那是 B 的性格。 */
+    background: var(--bg);
+    transition: box-shadow var(--motion-base) var(--ease-out),
+      border-color var(--motion-base) var(--ease-out);
   }
   .site-header__inner {
     display: flex;

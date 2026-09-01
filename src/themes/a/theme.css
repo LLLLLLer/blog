@@ -29,8 +29,14 @@
   font-size: 1.0625rem;
 }
 
+/* 极简阅读向：顶栏在页面顶端时几乎不存在，滚动后才浮出一道分隔线。
+   背景始终是实色，只有分隔线和阴影是 JS 增强 —— JS 挂了也不会透字。 */
 [data-theme='a'] .site-header {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
+}
+[data-theme='a'] .site-header[data-scrolled] {
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 12px color-mix(in oklab, var(--fg) 6%, transparent);
 }
 
 [data-theme='a'] .nav-link[data-active] {

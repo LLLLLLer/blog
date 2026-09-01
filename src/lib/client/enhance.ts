@@ -153,12 +153,38 @@ async function initMermaid() {
   await mermaid.run({ nodes: [...nodes] });
 }
 
+/**
+ * 顶栏的「已滚动」状态。
+ * 只影响分隔线和阴影 —— 背景色是 CSS 里的实色，不经过这里，
+ * 所以 JS 挂掉最多是少一道线，不会出现正文从顶栏底下透上来。
+ */
+function initHeaderScrollState() {
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const sentinel = document.querySelector<HTMLElement>('[data-scroll-sentinel]');
+  if (!header || !sentinel || header.dataset.scrollBound) return;
+  header.dataset.scrollBound = '1';
+
+  if (!('IntersectionObserver' in window)) {
+    header.setAttribute('data-scrolled', '');
+    return;
+  }
+
+  const io = new IntersectionObserver(
+    ([entry]) => header.toggleAttribute('data-scrolled', !entry.isIntersecting),
+    { threshold: 0 },
+  );
+  io.observe(sentinel);
+
+  document.addEventListener('astro:before-swap', () => io.disconnect(), { once: true });
+}
+
 /** 重特效（辉光/光标跟随/视差）在窄屏和降级模式下整体不启动 */
 function heavyMotionAllowed() {
   return !prefersReducedMotion() && !isNarrow();
 }
 
 function enhance() {
+  initHeaderScrollState();
   initScrollReveal();
   initTocFollow();
   initCodeCopy();
