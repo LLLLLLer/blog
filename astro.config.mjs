@@ -10,10 +10,11 @@ import { remarkMermaid } from './src/lib/remark-mermaid.mjs';
 /**
  * 站点绝对地址。影响 RSS 和 sitemap 里的链接，必须和线上实际地址一致。
  *
- * 这是 Workers 的免费域名（<worker名>.<账号子域>.workers.dev）。
- * 以后换成自己的域名，改这一行然后重新部署即可。
+ * 自定义域名，zone 托管在 Cloudflare。
+ * workers.dev 的地址（linners-note.ll1506670756.workers.dev）仍然可用，
+ * 但 canonical / RSS / sitemap 一律以这里为准。
  */
-export const SITE_URL = 'https://linners-note.ll1506670756.workers.dev';
+export const SITE_URL = 'https://linner.top';
 
 export default defineConfig({
   site: SITE_URL,
