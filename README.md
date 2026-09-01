@@ -10,7 +10,8 @@ Astro 7 + Cloudflare Pages。纯中文，本地 Markdown + git push 自动部署
 npm run dev      # 本地开发（含字体子集化）
 npm run build    # 构建到 dist/
 npm run preview  # 预览构建产物
-npm run font     # 只跑字体子集化
+npm run font       # 只跑字体子集化
+npm run check:font # 校验字体覆盖（build 时自动跑）
 npx astro check  # 类型检查
 ```
 
@@ -65,10 +66,17 @@ Firefox 跨文档尚未完成，MDN 标 "Limited availability" 非 Baseline，
 
 标题用得意黑（SIL OFL 1.1，可商用），正文用系统字体栈（0 字节）。
 
-完整得意黑 1.1MB。`scripts/subset-font.mjs` 在每次构建时扫描所有标题实际用到的字符，
-只为这些字生成子集 —— 实测 **1123.9KB → 31.1KB**。
+完整得意黑 1.1MB，覆盖 8136 个汉字。`scripts/subset-font.mjs` 在每次构建时扫描所有
+会用标题字体渲染的文案，只为实际用到的字符生成子集 —— 实测 **1123.9KB → 53.3KB**。
 
-新文章会带来新字符，所以子集化必须跟着 build 跑（已挂在 `npm run build` 前）。
+扫描范围必须覆盖 CSS 里所有 `font-family: var(--font-display)` 的地方，
+少扫一处就会出现「同一个标题里一半得意黑一半系统字体」的混排。目前扫两路：
+
+- **内容文件** —— frontmatter 的 title/description/tags + 正文里的 `#` 标题行 + MDX 组件属性
+- **源码文件** —— `.astro`/`.ts` 剥掉注释后的中文（注释里的中文不该占字体体积）
+
+`scripts/check-font-coverage.mjs` 会在每次 build 后校验产物：
+扫描遗漏直接让构建失败，真·生僻字（超出得意黑覆盖）只警告。
 
 ## 部署（Cloudflare Pages）
 
