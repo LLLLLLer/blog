@@ -21,11 +21,11 @@ export const SOCIALS = [
  * 然后去 https://giscus.app 生成下面四个值。详见 README 的部署章节。
  */
 export const GISCUS = {
-  enabled: false, // 四个字段填好后改成 true
-  repo: '', // 例: 'LLLLLLer/blog'
-  repoId: '',
+  enabled: true,
+  repo: 'LLLLLLer/blog',
+  repoId: 'R_kgDOUK3n8g',
   category: 'Announcements',
-  categoryId: '',
+  categoryId: 'DIC_kwDOUK3n8s4DEq4g',
 } as const;
 
 /** Cloudflare Web Analytics。在 CF 面板 → Web Analytics 拿 token 后填入 */

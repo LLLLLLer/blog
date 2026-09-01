@@ -1,0 +1,64 @@
+---
+title: 文章模板
+description: 一句话摘要，会显示在列表页和搜索结果里。不写也行。
+pubDate: 2026-09-02
+tags: [标签一, 标签二]
+draft: true
+---
+
+import DemoCanvas from '../../components/demo/DemoCanvas.astro';
+
+这个文件是**模板**，`draft: true` 表示它只在本地可见、不会发布。
+复制一份改个文件名就能开始写，文件名就是网址（`src/content/posts/hello.md` → `/posts/hello/`）。
+
+## 放哪个目录
+
+| 目录 | 网址 | 写什么 |
+| --- | --- | --- |
+| `src/content/posts/` | `/posts/` | 技术、教程、踩坑 |
+| `src/content/lab/` | `/lab/` | 可交互的实验 |
+| `src/content/notes/` | `/notes/` | 随笔 |
+| `src/content/works/` | `/works/` | 作品（字段不同，见 works/example.md） |
+
+## 能写什么
+
+代码块会自动高亮，右上角有一键复制：
+
+```ts
+const greet = (name: string) => `你好，${name}`;
+```
+
+行内公式 $E = mc^2$ 和独立公式都支持：
+
+$$
+\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+$$
+
+流程图直接写 mermaid 代码块（只有用到的页面才会加载渲染库）：
+
+```mermaid
+flowchart LR
+  A[想法] --> B[草稿]
+  B --> C[发布]
+```
+
+> 引用块长这样。正文里的图片点击可以放大。
+
+## 嵌交互 demo
+
+**只有 `.mdx` 文件能嵌组件，`.md` 不行。** 需要的话把扩展名改成 `.mdx`，
+在 frontmatter 下面写那行 import，然后：
+
+<DemoCanvas demo="orbit" title="双体轨道" note="拖动中心的点试试" height={320} />
+
+demo 本体写在 `src/demos/<名字>.ts`，默认导出一个 setup 函数。
+容器已经处理好高分屏缩放、尺寸变化、滚出视口暂停、降级和卸载，你只管画。
+照着 `src/demos/orbit.ts` 改最快。
+
+## 发布
+
+```bash
+git add . && git commit -m "新文章" && git push
+```
+
+把 `draft: true` 删掉或改成 `false`，这篇就会出现在线上。
