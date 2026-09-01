@@ -1,5 +1,4 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import type { SectionId } from '../config';
 
 export type WritingSection = 'posts' | 'notes' | 'lab';
 export type AnyEntry = CollectionEntry<'posts' | 'notes' | 'lab'>;
@@ -41,8 +40,6 @@ export async function getWorks() {
 
 export const isWritingSection = (s: string): s is WritingSection =>
   s === 'posts' || s === 'notes' || s === 'lab';
-
-export const sectionPath = (theme: string, section: SectionId) => `/${theme}/${section}`;
 
 export const formatDate = (d: Date) =>
   new Intl.DateTimeFormat('zh-CN', { dateStyle: 'long' }).format(d);

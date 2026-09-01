@@ -1,0 +1,30 @@
+---
+import Shell from '../../layouts/Shell.astro';
+import EntryList from '../../components/ui/EntryList.astro';
+import { getSection, type WritingSection } from '../../lib/content';
+import { SECTIONS } from '../../config';
+
+export function getStaticPaths() {
+  const sections: WritingSection[] = ['posts', 'notes', 'lab'];
+  return sections.map((section) => ({ params: { section } }));
+}
+
+const { section } = Astro.params;
+const meta = SECTIONS.find((s) => s.id === section)!;
+const entries = await getSection(section as WritingSection);
+const items = entries.map((entry) => ({ section: section as WritingSection, entry }));
+---
+
+<Shell title={meta.name} description={meta.desc} active={section}>
+  <header class="section-head">
+    <h1 class="section-head__title">{meta.name}</h1>
+    <p class="section-head__desc">{meta.desc}</p>
+  </header>
+  <EntryList items={items} />
+</Shell>
+
+<style>
+  .section-head { margin-bottom: 2.5rem; }
+  .section-head__title { font-size: clamp(1.75rem, 5vw, 2.75rem); }
+  .section-head__desc { color: var(--fg-muted); margin-top: 0.5rem; }
+</style>

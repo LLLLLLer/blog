@@ -1,22 +1,18 @@
 ---
 import { render } from 'astro:content';
-import Shell from '../../../layouts/Shell.astro';
-import { THEME_IDS } from '../../../themes';
-import { getWorks } from '../../../lib/content';
+import Shell from '../../layouts/Shell.astro';
+import { getWorks } from '../../lib/content';
 
 export async function getStaticPaths() {
   const works = await getWorks();
-  return THEME_IDS.flatMap((theme) =>
-    works.map((entry) => ({ params: { theme, slug: entry.id }, props: { entry } })),
-  );
+  return works.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
-const { theme } = Astro.params;
 const { Content } = await render(entry);
 ---
 
-<Shell title={entry.data.title} description={entry.data.description} theme={theme as 'a' | 'b' | 'c'} active="works">
+<Shell title={entry.data.title} description={entry.data.description} active="works">
   <article>
     <h1 class="work-title">{entry.data.title}</h1>
     <p class="work-meta">

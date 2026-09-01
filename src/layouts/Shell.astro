@@ -1,27 +1,21 @@
 ---
 import Base from './Base.astro';
 import { SITE, SECTIONS, SOCIALS } from '../config';
-import { getTheme } from '../themes';
 import ColorToggle from '../components/ui/ColorToggle.astro';
-import CursorGlow from '../components/ui/CursorGlow.astro';
 
 interface Props {
   title: string;
   description?: string;
-  theme: 'a' | 'b' | 'c';
   /** 当前分区，用于导航高亮 */
   active?: string;
-  /** 首页不需要外层容器约束 */
+  /** 首页自己控制容器宽度 */
   bare?: boolean;
 }
 
-const { title, description, theme, active, bare = false } = Astro.props;
-const meta = getTheme(theme)!;
+const { title, description, active, bare = false } = Astro.props;
 ---
 
-<Base title={title} description={description} theme={theme}>
-  {theme === 'b' && <CursorGlow />}
-
+<Base title={title} description={description}>
   <a href="#main" class="skip-link">跳到正文</a>
 
   {/* 页面顶端的哨兵：它滚出视口即代表「已滚动」，比监听 scroll 事件省 */}
@@ -29,21 +23,17 @@ const meta = getTheme(theme)!;
 
   <header class="site-header" data-site-header>
     <div class="shell-inner site-header__inner">
-      <a href={`/${theme}`} class="brand">{SITE.title}</a>
+      <a href="/" class="brand">{SITE.title}</a>
       <nav class="nav" aria-label="主导航">
         {SECTIONS.map((s) => (
-          <a
-            href={`/${theme}/${s.id}`}
-            class="nav-link"
-            data-active={active === s.id ? '' : undefined}
-          >
+          <a href={`/${s.id}`} class="nav-link" data-active={active === s.id ? '' : undefined}>
             {s.name}
           </a>
         ))}
-        <a href={`/${theme}/search`} class="nav-link" data-active={active === 'search' ? '' : undefined}>
+        <a href="/search" class="nav-link" data-active={active === 'search' ? '' : undefined}>
           搜索
         </a>
-        {meta.hasColorToggle && <ColorToggle />}
+        <ColorToggle />
       </nav>
     </div>
   </header>
@@ -58,7 +48,6 @@ const meta = getTheme(theme)!;
       <p class="site-footer__links">
         {SOCIALS.map((s) => <a href={s.href}>{s.name}</a>)}
         <a href="/rss.xml">RSS</a>
-        <a href="/" class="site-footer__switch">切换候选 →</a>
       </p>
     </div>
   </footer>
@@ -100,8 +89,7 @@ const meta = getTheme(theme)!;
     position: sticky;
     top: 0;
     z-index: 20;
-    /* 实色背景，不能依赖 JS —— sticky 顶栏透明会让正文从底下透上来。
-       候选 B 会把它覆盖成毛玻璃，那是 B 的性格。 */
+    /* 实色背景，不能依赖 JS —— sticky 顶栏透明会让正文从底下透上来 */
     background: var(--bg);
     transition: box-shadow var(--motion-base) var(--ease-out),
       border-color var(--motion-base) var(--ease-out);
@@ -147,7 +135,6 @@ const meta = getTheme(theme)!;
   .site-footer__links { display: flex; gap: 1rem; }
   .site-footer__links a { transition: color var(--motion-fast) var(--ease-out); }
   .site-footer__links a:hover { color: var(--accent); }
-  .site-footer__switch { color: var(--accent); }
 
   @media (max-width: 640px) {
     .site-header__inner { height: auto; padding-block: 0.75rem; flex-wrap: wrap; }

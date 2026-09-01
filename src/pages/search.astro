@@ -1,15 +1,11 @@
 ---
-import Shell from '../../layouts/Shell.astro';
-import { THEME_IDS } from '../../themes';
-
-export const getStaticPaths = () => THEME_IDS.map((theme) => ({ params: { theme } }));
-const { theme } = Astro.params;
+import Shell from '../layouts/Shell.astro';
 ---
 
-<Shell title="搜索" theme={theme as 'a' | 'b' | 'c'} active="search">
+<Shell title="搜索" active="search">
   <h1 class="search-title">搜索</h1>
 
-  <form class="search" role="search" data-search-root data-theme-id={theme} onsubmit="return false">
+  <form class="search" role="search" data-search-root onsubmit="return false">
     <input
       type="search"
       id="q"
@@ -47,7 +43,6 @@ const { theme } = Astro.params;
     const status = document.querySelector<HTMLElement>('[data-search-status]');
     if (!root || !input || !results || !status || input.dataset.bound) return;
     input.dataset.bound = '1';
-    const theme = root.dataset.themeId ?? 'a';
 
     let fuse: Fuse<SearchItem> | null = null;
     let loading: Promise<void> | null = null;
@@ -92,7 +87,7 @@ const { theme } = Astro.params;
             ? `<p class="search__desc">${escapeHtml(item.description)}</p>`
             : '';
           return `<li class="search__item">
-            <a href="/${theme}/${item.section}/${item.id}">${escapeHtml(item.title)}</a>
+            <a href="/${item.section}/${item.id}">${escapeHtml(item.title)}</a>
             ${desc}
             <p class="search__meta">${label}</p>
           </li>`;

@@ -1,89 +1,83 @@
 ---
-import Base from '../layouts/Base.astro';
-import { THEMES } from '../themes';
+import Shell from '../layouts/Shell.astro';
+import HeroCanvas from '../components/motion/HeroCanvas.astro';
+import EntryList from '../components/ui/EntryList.astro';
+import { SITE, SOCIALS } from '../config';
+import { getAllWriting, getWorks } from '../lib/content';
+
+const items = (await getAllWriting()).slice(0, 8);
+// 只展示 featured 的作品；一个都没有时这一块整体不渲染
+const works = (await getWorks()).filter((w) => w.data.featured).slice(0, 4);
 ---
 
-<Base title="选一个视觉候选" description="三个候选共用同一套内容和能力，只在视觉与动效强度上分叉。">
-  <main class="picker">
-    <header class="picker__head">
-      <h1 class="picker__title">选一个</h1>
-      <p class="picker__lead">
-        三个候选<strong>共用同一套内容、同一套能力</strong>（搜索、目录、代码复制、RSS、公式、图表、
-        交互 demo 容器、字体管线、降级策略），只在视觉与动效强度上分叉。
-        所以你在对比的是气质，不是功能。
-      </p>
-      <p class="picker__hint">建议手机和桌面各看一遍——动效强度的差别在手机上会被降级抹平一部分。</p>
-    </header>
+<Shell title={SITE.title} bare>
+  <div class="home">
+    <section class="hero">
+      <HeroCanvas density={14} />
+      <div class="hero__text">
+        <h1 class="hero__name">{SITE.author}</h1>
+        <p class="hero__tagline">{SITE.tagline}</p>
+        {SOCIALS.length > 0 && (
+          <p class="hero__socials">{SOCIALS.map((s) => <a href={s.href}>{s.name}</a>)}</p>
+        )}
+      </div>
+    </section>
 
-    <ul class="picker__list">
-      {THEMES.map((t) => (
-        <li class="picker__item">
-          <a href={`/${t.id}`} class="picker__link">
-            <span class="picker__id">{t.id.toUpperCase()}</span>
-            <span class="picker__body">
-              <span class="picker__name">{t.name}</span>
-              <span class="picker__vibe">{t.vibe}</span>
-              <span class="picker__meta">
-                参考 {t.basedOn}
-                {!t.hasColorToggle && <span> · 暗色原生，无明暗切换</span>}
-              </span>
-            </span>
-            <span class="picker__arrow" aria-hidden="true">→</span>
-          </a>
-        </li>
-      ))}
-    </ul>
+    {works.length > 0 && (
+      <section class="block">
+        <h2 class="block__title">精选项目</h2>
+        <ul class="picks">
+          {works.map((w) => (
+            <li>
+              <a href={`/works/${w.id}`}>{w.data.title}</a>
+              <span>{w.data.description}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
-    <footer class="picker__foot">
-      <p>定下来之后，删掉另外两个、把选中的提到根路径，这个页面就没用了。</p>
-      <p>站名、域名、社交链接目前是占位符（见 <code>src/config.ts</code>）。</p>
-    </footer>
-  </main>
-</Base>
+    <section class="block">
+      <h2 class="block__title">最新</h2>
+      <EntryList items={items} showSection />
+    </section>
+  </div>
+</Shell>
 
 <style>
-  .picker {
-    max-width: 44rem;
+  .home {
+    max-width: 62rem;
     margin-inline: auto;
-    padding: clamp(3rem, 10vh, 6rem) 1.25rem 4rem;
+    padding: 0 1.25rem 5rem;
   }
-  .picker__title { font-size: clamp(2rem, 7vw, 3rem); }
-  .picker__lead { margin-top: 1rem; color: var(--fg-muted); }
-  .picker__lead strong { color: var(--fg); font-weight: 600; }
-  .picker__hint { margin-top: 0.75rem; font-size: 0.85rem; color: var(--fg-muted); }
 
-  .picker__list { margin-top: 2.5rem; display: grid; gap: 0.75rem; }
-  .picker__link {
-    display: grid;
-    grid-template-columns: 2.5rem 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    padding: 1.25rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    transition: border-color 200ms ease, transform 200ms ease;
+  .hero {
+    position: relative;
+    padding-block: 5rem 4rem;
+    overflow: hidden;
   }
-  .picker__link:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .picker__id {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    color: var(--accent);
-  }
-  .picker__body { display: grid; gap: 0.3rem; }
-  .picker__name { font-family: var(--font-display); font-size: 1.15rem; color: var(--fg); }
-  .picker__vibe { color: var(--fg-muted); font-size: 0.9rem; }
-  .picker__meta { color: var(--fg-muted); font-size: 0.75rem; }
-  .picker__arrow { color: var(--fg-muted); }
-
-  .picker__foot {
-    margin-top: 3rem;
-    font-size: 0.8rem;
+  .hero__text { position: relative; z-index: 1; }
+  .hero__name { font-size: clamp(2rem, 6vw, 3rem); }
+  .hero__tagline {
     color: var(--fg-muted);
-    line-height: 2;
+    margin-top: 0.85rem;
+    max-width: 32rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
   }
-  .picker__foot code { font-family: var(--font-mono); }
+  .hero__socials { display: flex; gap: 1.25rem; margin-top: 1.5rem; font-size: 0.85rem; }
+  .hero__socials a { color: var(--accent); }
 
-  @media (prefers-reduced-motion: reduce) {
-    .picker__link:hover { transform: none; }
+  .block { margin-top: 3.5rem; }
+  .block__title {
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    color: var(--fg-muted);
+    margin-bottom: 1.1rem;
   }
+  .picks { display: grid; gap: 0.65rem; margin-bottom: 1rem; }
+  .picks li { display: flex; gap: 0.75rem; align-items: baseline; font-size: 0.925rem; }
+  .picks a { font-family: var(--font-display); color: var(--fg); }
+  .picks a:hover { color: var(--accent); }
+  .picks span { color: var(--fg-muted); font-size: 0.85rem; }
 </style>

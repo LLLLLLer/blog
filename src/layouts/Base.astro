@@ -1,28 +1,22 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { SITE, ANALYTICS } from '../config';
-import { getTheme } from '../themes';
 import '../styles/base.css';
-import '../themes/a/theme.css';
-import '../themes/b/theme.css';
-import '../themes/c/theme.css';
+import '../styles/theme.css';
 
 interface Props {
   title: string;
   description?: string;
-  /** 未传时为候选选择页，用中性配色 */
-  theme?: 'a' | 'b' | 'c';
   ogImage?: string;
 }
 
-const { title, description = SITE.description, theme, ogImage } = Astro.props;
-const meta = theme ? getTheme(theme) : undefined;
+const { title, description = SITE.description, ogImage } = Astro.props;
 const fullTitle = title === SITE.title ? title : `${title} · ${SITE.title}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang={SITE.lang} data-theme={theme ?? 'neutral'} class={meta && !meta.hasColorToggle ? 'dark' : ''}>
+<html lang={SITE.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,7 +41,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         const root = document.documentElement;
         // 标记 JS 可用。滚动进场只在有 JS 时才先隐藏，否则内容永远揭不开
         root.classList.add('js');
-        if (root.dataset.theme === 'b') return; // B 是暗色原生，不参与切换
         const saved = localStorage.getItem('color-scheme');
         const dark = saved
           ? saved === 'dark'

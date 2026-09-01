@@ -17,14 +17,11 @@ const SELECTORS = [
   [/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/g, '标题 h1-h4'],
   [/class="brand"[^>]*>([\s\S]*?)</g, '站名'],
   [/class="demo__title"[^>]*>([\s\S]*?)</g, 'demo 标题'],
+  [/class="picks"[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)</g, '首页精选项目'],
   [/class="block__title"[^>]*>([\s\S]*?)</g, '区块小标题'],
   [/class="entry-card__title"[^>]*>([\s\S]*?)</g, '条目标题'],
-  [/class="entry-row__title"[^>]*>([\s\S]*?)</g, '条目标题'],
-  [/class="picks__title"[^>]*>([\s\S]*?)</g, '精选项目标题'],
   [/class="work__title"[^>]*>([\s\S]*?)</g, '作品标题'],
-  [/class="picker__name"[^>]*>([\s\S]*?)</g, '候选名'],
   [/class="toc__title"[^>]*>([\s\S]*?)</g, '目录标题'],
-  [/class="entry-row__index"[^>]*>([\s\S]*?)</g, '序号'],
 ];
 
 const CJK = /[㐀-鿿豈-﫿]/;

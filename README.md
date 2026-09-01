@@ -2,7 +2,8 @@
 
 Astro 7 + Cloudflare Pages。纯中文，本地 Markdown + git push 自动部署。
 
-**当前状态：三个视觉候选并存，等待挑选。** 打开 `/` 是候选选择页。
+视觉是极简亮色阅读向：留白、衬线正文、动效克制。
+配色令牌全在 `src/styles/theme.css`，改那一个文件就能整体换肤。
 
 ## 命令
 
@@ -15,7 +16,7 @@ npm run check:font # 校验字体覆盖（build 时自动跑）
 npx astro check  # 类型检查
 ```
 
-### 做视觉评审时用 preview，不要用 dev
+### 只看视觉效果时用 preview，不要用 dev
 
 ```bash
 SHOW_DRAFTS=1 npm run build
@@ -27,31 +28,19 @@ npx astro preview --host 127.0.0.1 --port 4321
 页面就会没有任何样式。生产构建里 CSS 是老老实实的 `<link rel="stylesheet">`，不依赖 JS。
 
 `SHOW_DRAFTS=1` 让草稿（`draft: true`）进构建，这样能看到「有作品时首页长什么样」。
-不加这个变量则和线上一致，草稿被过滤掉。
+不加这个变量则和线上一致，草稿被过滤掉。目前 `src/content/works/example.md` 就是这样一个草稿模板。
 
 远程服务器上看，本地开个 SSH 隧道：`ssh -L 4321:127.0.0.1:4321 <user>@<host>`，
 然后浏览器开 http://localhost:4321 。
 
-## 三个候选
-
-| 路径 | 候选 | 气质 |
-| --- | --- | --- |
-| `/a` | 极简亮色阅读向 | 留白、衬线正文、动效克制。有明暗切换 |
-| `/b` | 暗色科技感 | 深色底、辉光、毛玻璃、光标跟随。暗色原生，无明暗切换 |
-| `/c` | 杂志编辑感 | 超大标题、序号栅格、强排版。有明暗切换 |
-
-三个**共用同一套内容和同一套能力**，只在视觉与动效强度上分叉。
-定下来之后：删掉 `src/themes/` 里另外两个和对应的 `Home.astro`，
-把选中的路由从 `/[theme]/...` 提到根路径，删掉 `src/pages/index.astro` 选择页。
-
 ## 写文章
 
-```
-src/content/posts/   技术  —— 教程、笔记、踩坑
-src/content/lab/     实验  —— 可交互的小玩意儿
-src/content/notes/   随笔
-src/content/works/   作品
-```
+| 目录 | 路由 | 内容 |
+| --- | --- | --- |
+| `src/content/posts/` | `/posts` | 技术 —— 教程、笔记、踩坑 |
+| `src/content/lab/` | `/lab` | 实验 —— 可交互的小玩意儿 |
+| `src/content/notes/` | `/notes` | 随笔 |
+| `src/content/works/` | `/works` | 作品 |
 
 放 `.md` 即可。要在正文里嵌交互 demo 就用 `.mdx`：
 

@@ -7,7 +7,6 @@ import MathStyles from '../components/ui/MathStyles.astro';
 import { formatDate } from '../lib/content';
 
 interface Props {
-  theme: 'a' | 'b' | 'c';
   section: string;
   title: string;
   description?: string;
@@ -17,11 +16,11 @@ interface Props {
   headings: MarkdownHeading[];
 }
 
-const { theme, section, title, description, pubDate, updatedDate, tags = [], headings } =
+const { section, title, description, pubDate, updatedDate, tags = [], headings } =
   Astro.props;
 ---
 
-<Shell title={title} description={description} theme={theme} active={section}>
+<Shell title={title} description={description} active={section}>
   <MathStyles />
   <article class="article">
     <header class="article__head">

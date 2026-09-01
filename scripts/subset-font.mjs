@@ -22,7 +22,7 @@ const OUT_DIR = 'public/fonts';
 const OUT = join(OUT_DIR, 'smiley-sans-subset.woff2');
 
 const CONTENT_DIRS = ['src/content'];
-const SOURCE_DIRS = ['src/components', 'src/layouts', 'src/pages', 'src/themes', 'src/lib'];
+const SOURCE_DIRS = ['src/components', 'src/layouts', 'src/pages', 'src/lib'];
 const SOURCE_FILES = ['src/config.ts'];
 
 /** 兜底字符：数字、拉丁、标点，以及运行时才产生的少量文案 */

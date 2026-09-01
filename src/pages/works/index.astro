@@ -1,15 +1,11 @@
 ---
-import Shell from '../../../layouts/Shell.astro';
-import { THEME_IDS } from '../../../themes';
-import { getWorks } from '../../../lib/content';
+import Shell from '../../layouts/Shell.astro';
+import { getWorks } from '../../lib/content';
 
-export const getStaticPaths = () => THEME_IDS.map((theme) => ({ params: { theme } }));
-
-const { theme } = Astro.params;
 const works = await getWorks();
 ---
 
-<Shell title="作品" description="做过的东西" theme={theme as 'a' | 'b' | 'c'} active="works">
+<Shell title="作品" description="做过的东西" active="works">
   <header class="section-head">
     <h1 class="section-head__title">作品</h1>
     <p class="section-head__desc">做过的东西</p>
@@ -23,9 +19,9 @@ const works = await getWorks();
   ) : (
     <ul class="works">
       {works.map((w, i) => (
-        <li class="card work" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 50}ms`}>
+        <li class="work" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 50}ms`}>
           <div class="work__head">
-            <a href={`/${theme}/works/${w.id}`} class="work__title">{w.data.title}</a>
+            <a href={`/works/${w.id}`} class="work__title">{w.data.title}</a>
             <span class="work__year">{w.data.year}</span>
           </div>
           <p class="work__desc">{w.data.description}</p>
@@ -49,7 +45,7 @@ const works = await getWorks();
 
   .works { display: grid; gap: 0.75rem; }
   .work { padding: 1.25rem; border-radius: var(--radius); }
-  .work:not(:where([data-theme='b'] *)) { border: 1px solid var(--border); }
+  .work { border: 1px solid var(--border); }
   .work__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
   .work__title { font-family: var(--font-display); font-size: 1.2rem; color: var(--fg); }
   .work__title:hover { color: var(--accent); }

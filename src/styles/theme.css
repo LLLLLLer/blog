@@ -1,6 +1,7 @@
-/* 候选 A —— 极简亮色阅读向
- * 取向：留白、克制、字体讲究。动效只在必要处出现，不主动引起注意。 */
-[data-theme='a'] {
+/* 视觉主题：极简亮色阅读向。
+ * 留白、克制、字体讲究，动效只在必要处出现，不主动引起注意。
+ * 所有配色令牌都在这里，改这一个文件就能整体换肤。 */
+:root {
   --bg: #fdfcfa;
   --bg-subtle: #f3f1ec;
   --fg: #23201c;
@@ -14,7 +15,7 @@
   --motion-slow: 320ms;
 }
 
-[data-theme='a'].dark {
+html.dark {
   --bg: #161513;
   --bg-subtle: #201e1b;
   --fg: #e9e5dd;
@@ -23,22 +24,22 @@
   --accent: #e08e6f;
 }
 
-/* 正文用衬线，是这个候选最明显的性格 */
-[data-theme='a'] .prose {
+/* 正文用衬线，是这套视觉最明显的性格 */
+.prose {
   font-family: var(--font-serif);
   font-size: 1.0625rem;
 }
 
-/* 极简阅读向：顶栏在页面顶端时几乎不存在，滚动后才浮出一道分隔线。
+/* 顶栏在页面顶端时几乎不存在，滚动后才浮出一道分隔线。
    背景始终是实色，只有分隔线和阴影是 JS 增强 —— JS 挂了也不会透字。 */
-[data-theme='a'] .site-header {
+.site-header {
   border-bottom: 1px solid transparent;
 }
-[data-theme='a'] .site-header[data-scrolled] {
+.site-header[data-scrolled] {
   border-bottom-color: var(--border);
   box-shadow: 0 1px 12px color-mix(in oklab, var(--fg) 6%, transparent);
 }
 
-[data-theme='a'] .nav-link[data-active] {
+.nav-link[data-active] {
   color: var(--accent);
 }
