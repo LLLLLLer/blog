@@ -84,6 +84,15 @@ Firefox 跨文档尚未完成，MDN 标 "Limited availability" 非 Baseline，
 `scripts/check-font-coverage.mjs` 会在每次 build 后校验产物：
 扫描遗漏直接让构建失败，真·生僻字（超出得意黑覆盖）只警告。
 
+**输出文件名带内容哈希**（`smiley-sans-subset.<hash>.woff2`），URL 随内容变化，
+因此 `_headers` 给它 `immutable` 一年的长缓存也是安全的。
+文件名写不进 CSS，所以 `@font-face` 和 preload 由 `Base.astro` 读
+`src/generated/font.ts` 生成——那个文件是构建产物但要入库，
+否则 CI 上 Astro 会在字体脚本跑完之前就找不到它。
+
+> 早期版本文件名固定、却设了一天缓存，导致子集更新后浏览器继续用旧的缺字版本，
+> 表现为「同一个标题里一半得意黑一半系统字体」。带哈希之后这个坑消失了。
+
 ## 部署（Cloudflare Workers Static Assets）
 
 用 Workers 而不是 Pages：Cloudflare 已宣布弃用 Pages，2026 年 3 月起 Workers

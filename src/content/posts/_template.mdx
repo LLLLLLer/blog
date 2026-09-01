@@ -3,12 +3,12 @@ title: 文章模板
 description: 一句话摘要，会显示在列表页和搜索结果里。不写也行。
 pubDate: 2026-09-02
 tags: [标签一, 标签二]
-draft: false
+draft: true
 ---
 
 import DemoCanvas from '../../components/demo/DemoCanvas.astro';
 
-这个文件是**模板**，`draft: false` 表示它只在本地可见、不会发布。
+这个文件是**模板**，`draft: true` 表示它只在本地可见、不会发布。
 复制一份改个文件名就能开始写，文件名就是网址（`src/content/posts/hello.md` → `/posts/hello/`）。
 
 ## 放哪个目录
@@ -61,4 +61,4 @@ demo 本体写在 `src/demos/<名字>.ts`，默认导出一个 setup 函数。
 git add . && git commit -m "新文章" && git push
 ```
 
-把 `draft: false` 删掉或改成 `false`，这篇就会出现在线上。
+把 `draft: true` 删掉或改成 `false`，这篇就会出现在线上。
