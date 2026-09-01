@@ -23,7 +23,7 @@ const SECTION_LABEL: Record<WritingSection, string> = {
   <ul class="entry-cards">
     {items.map(({ section, entry }, i) => (
       <li class="entry-card" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 40}ms`}>
-        <a href={`/${section}/${entry.id}`} class="entry-card__title">{entry.data.title}</a>
+        <a href={`/${section}/${entry.id}/`} class="entry-card__title">{entry.data.title}</a>
         {entry.data.description && <p class="entry-desc">{entry.data.description}</p>}
         <p class="entry-meta">
           <time datetime={entry.data.pubDate.toISOString()}>{formatDate(entry.data.pubDate)}</time>

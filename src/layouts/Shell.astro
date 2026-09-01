@@ -26,11 +26,11 @@ const { title, description, active, bare = false } = Astro.props;
       <a href="/" class="brand">{SITE.title}</a>
       <nav class="nav" aria-label="主导航">
         {SECTIONS.map((s) => (
-          <a href={`/${s.id}`} class="nav-link" data-active={active === s.id ? '' : undefined}>
+          <a href={`/${s.id}/`} class="nav-link" data-active={active === s.id ? '' : undefined}>
             {s.name}
           </a>
         ))}
-        <a href="/search" class="nav-link" data-active={active === 'search' ? '' : undefined}>
+        <a href="/search/" class="nav-link" data-active={active === 'search' ? '' : undefined}>
           搜索
         </a>
         <ColorToggle />

@@ -9,8 +9,8 @@ import { SECTIONS } from '../config';
     <p class="notfound__text">这个地址下面没有东西。可能是链接过期了，或者我把文章挪了地方。</p>
     <p class="notfound__links">
       <a href="/">回首页</a>
-      {SECTIONS.map((s) => <a href={`/${s.id}`}>{s.name}</a>)}
-      <a href="/search">搜索</a>
+      {SECTIONS.map((s) => <a href={`/${s.id}/`}>{s.name}</a>)}
+      <a href="/search/">搜索</a>
     </p>
   </div>
 </Shell>

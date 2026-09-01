@@ -21,7 +21,7 @@ const works = await getWorks();
       {works.map((w, i) => (
         <li class="work" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 50}ms`}>
           <div class="work__head">
-            <a href={`/works/${w.id}`} class="work__title">{w.data.title}</a>
+            <a href={`/works/${w.id}/`} class="work__title">{w.data.title}</a>
             <span class="work__year">{w.data.year}</span>
           </div>
           <p class="work__desc">{w.data.description}</p>

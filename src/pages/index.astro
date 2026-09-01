@@ -29,7 +29,7 @@ const works = (await getWorks()).filter((w) => w.data.featured).slice(0, 4);
         <ul class="picks">
           {works.map((w) => (
             <li>
-              <a href={`/works/${w.id}`}>{w.data.title}</a>
+              <a href={`/works/${w.id}/`}>{w.data.title}</a>
               <span>{w.data.description}</span>
             </li>
           ))}

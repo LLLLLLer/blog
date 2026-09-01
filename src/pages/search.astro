@@ -87,7 +87,7 @@ import Shell from '../layouts/Shell.astro';
             ? `<p class="search__desc">${escapeHtml(item.description)}</p>`
             : '';
           return `<li class="search__item">
-            <a href="/${item.section}/${item.id}">${escapeHtml(item.title)}</a>
+            <a href="/${item.section}/${item.id}/">${escapeHtml(item.title)}</a>
             ${desc}
             <p class="search__meta">${label}</p>
           </li>`;

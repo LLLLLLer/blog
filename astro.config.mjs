@@ -10,13 +10,10 @@ import { remarkMermaid } from './src/lib/remark-mermaid.mjs';
 /**
  * 站点绝对地址。影响 RSS 和 sitemap 里的链接，必须和线上实际地址一致。
  *
- * !! 首次部署后必须改这一行 !!
- * Workers 的免费域名是 <worker名>.<你的账号子域>.workers.dev，
- * 那个账号子域只有部署过一次才知道。第一次 wrangler deploy 完，
- * 终端会打印真实地址，把它填到这里再重新部署一次，RSS 和 sitemap 才是对的。
- * 以后换成自己的域名，同样改这一行。
+ * 这是 Workers 的免费域名（<worker名>.<账号子域>.workers.dev）。
+ * 以后换成自己的域名，改这一行然后重新部署即可。
  */
-export const SITE_URL = 'https://linners-note.workers.dev';
+export const SITE_URL = 'https://linners-note.ll1506670756.workers.dev';
 
 export default defineConfig({
   site: SITE_URL,
