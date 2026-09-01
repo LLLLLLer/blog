@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { SITE, ANALYTICS } from '../config';
+import { FONT_URL } from '../generated/font';
 import '../styles/base.css';
 import '../styles/theme.css';
 
@@ -36,8 +37,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonical} />
     {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
 
-    <!-- 标题字体是首屏可见元素，提前建连 -->
-    <link rel="preload" href="/fonts/smiley-sans-subset.woff2" as="font" type="font/woff2" crossorigin />
+    {/* 标题字体是首屏可见元素，提前建连。
+        URL 带内容哈希，由 scripts/subset-font.mjs 在构建期生成 */}
+    <link rel="preload" href={FONT_URL} as="font" type="font/woff2" crossorigin />
+    <style set:html={`@font-face{font-family:'Smiley Sans';src:url('${FONT_URL}') format('woff2');font-weight:400;font-style:normal;font-display:swap}`}></style>
 
     {/* 明暗模式在 body 渲染前定好，避免刷新时闪一下白 */}
     <script is:inline>

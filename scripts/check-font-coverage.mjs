@@ -8,13 +8,13 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import * as fontkit from 'fontkit';
 
-const SUBSET = 'public/fonts/smiley-sans-subset.woff2';
+const SUBSET = (await readdir('public/fonts')).find((f) => f.endsWith('.woff2'));
 const FULL = 'assets/fonts/SmileySans-Oblique.woff2';
 const DIST = 'dist';
 
 /** 这些选择器对应 CSS 里 font-family: var(--font-display) 的元素 */
 const SELECTORS = [
-  [/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/g, '标题 h1-h4'],
+  [/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/g, '标题 h1-h6'],
   [/class="brand"[^>]*>([\s\S]*?)</g, '站名'],
   [/class="demo__title"[^>]*>([\s\S]*?)</g, 'demo 标题'],
   [/class="picks"[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)</g, '首页精选项目'],
@@ -34,7 +34,9 @@ async function* walk(dir) {
   }
 }
 
-const subset = new Set(fontkit.openSync(SUBSET).characterSet.map((c) => String.fromCodePoint(c)));
+const subset = new Set(
+  fontkit.openSync(join('public/fonts', SUBSET)).characterSet.map((c) => String.fromCodePoint(c)),
+);
 const full = new Set(fontkit.openSync(FULL).characterSet.map((c) => String.fromCodePoint(c)));
 
 const missing = new Map();

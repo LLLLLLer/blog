@@ -3,9 +3,9 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# 字体子集文件名不带哈希，但内容变化时 HTML 会重新引用，给一天
+# 字体子集文件名带内容哈希，改了就是新 URL，可以永久缓存
 /fonts/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=31536000, immutable
 
 /*
   X-Content-Type-Options: nosniff

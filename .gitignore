@@ -6,3 +6,6 @@ dist/
 
 # 构建期生成的字体子集，不进版本库（每次 build 会重新生成）
 public/fonts/
+
+# src/generated/font.ts 是生成的，但要入库：
+# Astro 构建会 import 它，CI 上必须在跑 astro 之前就存在

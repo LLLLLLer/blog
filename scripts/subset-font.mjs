@@ -13,13 +13,16 @@
  *
  * 新文章会带来新字符，所以这一步必须跟着每次 build 跑（见 package.json 的 prebuild）。
  */
-import { readFile, writeFile, mkdir, readdir, stat } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, stat, rm } from 'node:fs/promises';
 import { join, extname } from 'node:path';
+import { createHash } from 'node:crypto';
 import subsetFont from 'subset-font';
 
 const SRC = 'assets/fonts/SmileySans-Oblique.woff2';
 const OUT_DIR = 'public/fonts';
-const OUT = join(OUT_DIR, 'smiley-sans-subset.woff2');
+// 文件名带内容哈希：子集变了 URL 就变，浏览器不会拿旧缓存里缺字的版本，
+// 也因此可以放心给它 immutable 的长缓存。生成的 URL 写进 src/generated/font.ts。
+const MANIFEST = 'src/generated/font.ts';
 
 const CONTENT_DIRS = ['src/content'];
 const SOURCE_DIRS = ['src/components', 'src/layouts', 'src/pages', 'src/lib'];
@@ -109,15 +112,30 @@ async function main() {
   const source = await readFile(SRC);
   const buffer = await subsetFont(source, subsetChars, { targetFormat: 'woff2' });
 
+  const hash = createHash('sha256').update(buffer).digest('hex').slice(0, 8);
+  const filename = `smiley-sans-subset.${hash}.woff2`;
+
   await mkdir(OUT_DIR, { recursive: true });
-  await writeFile(OUT, buffer);
+  // 清掉上一次构建留下的旧哈希文件，避免 public/ 越堆越多
+  for (const f of await readdir(OUT_DIR).catch(() => [])) {
+    if (f.startsWith('smiley-sans-subset.') && f !== filename) {
+      await rm(join(OUT_DIR, f), { force: true });
+    }
+  }
+  await writeFile(join(OUT_DIR, filename), buffer);
+
+  await mkdir('src/generated', { recursive: true });
+  await writeFile(
+    MANIFEST,
+    `// 由 scripts/subset-font.mjs 生成，不要手改\nexport const FONT_URL = '/fonts/${filename}';\n`,
+  );
 
   const original = (await stat(SRC)).size;
   const kb = (n) => `${(n / 1024).toFixed(1)}KB`;
   console.log(
     `[font] ${contentFiles} 篇内容 + ${sourceFiles} 个源码文件 → ${subsetChars.length} 字符  ` +
       `${kb(original)} → ${kb(buffer.length)}  ` +
-      `(${((1 - buffer.length / original) * 100).toFixed(1)}% 省掉)`,
+      `(${((1 - buffer.length / original) * 100).toFixed(1)}% 省掉)  ${filename}`,
   );
 }
 
