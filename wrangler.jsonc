@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Worker 名字决定免费域名：<name>.<你的账号子域>.workers.dev
+  // 改名会换域名，别在上线后随便改
+  "name": "linners-note",
+  "compatibility_date": "2026-09-01",
+
+  // 纯静态站：只有资源、没有 Worker 脚本，所以不需要 main 和 binding
+  "assets": {
+    "directory": "./dist",
+    // dist/404.html 用作找不到页面时的响应
+    "not_found_handling": "404-page"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

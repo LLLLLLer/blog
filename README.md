@@ -84,14 +84,87 @@ Firefox 跨文档尚未完成，MDN 标 "Limited availability" 非 Baseline，
 `scripts/check-font-coverage.mjs` 会在每次 build 后校验产物：
 扫描遗漏直接让构建失败，真·生僻字（超出得意黑覆盖）只警告。
 
-## 部署（Cloudflare Pages）
+## 部署（Cloudflare Workers Static Assets）
 
-- 构建命令 `npm run build`，输出目录 `dist`
-- Node 版本 22（见 `.nvmrc`，Astro 7 要求 ≥22.12）
-- 缓存和安全头见 `public/_headers`
+用 Workers 而不是 Pages：Cloudflare 已宣布弃用 Pages，2026 年 3 月起 Workers
+在静态资源、SSR、自定义域名上与 Pages 功能对等，官方对新项目的建议是直接上 Workers。
+现有 Pages 项目不强制迁移，但新建就没必要再进那条路。
 
-## 待补充
+`public/_headers` 里的缓存与安全头在 Workers 上原生支持，不用改。
 
-`src/config.ts` 里带 TODO 的都是占位符：站名、作者名、tagline、社交链接、
-Giscus 四个 ID、Cloudflare Analytics token。
-`astro.config.mjs` 里的 `site` 也要换成真实域名（影响 RSS 和 sitemap）。
+### 1. 推到 GitHub
+
+```bash
+gh repo create LLLLLLer/blog --private --source=. --remote=origin --push
+# 或者手动：在 GitHub 建空仓库后
+# git remote add origin git@github.com:LLLLLLer/blog.git && git push -u origin main
+```
+
+评论要用 Giscus 的话仓库必须是 **public**（见下面第 5 步）。
+
+### 2. 首次部署
+
+```bash
+npx wrangler login     # 浏览器授权；在无浏览器的服务器上它会给出可复制的链接
+npm run deploy         # = npm run build && wrangler deploy
+```
+
+部署完终端会打印真实地址，形如 `https://linners-note.<你的账号子域>.workers.dev`。
+
+### 3. 改 SITE_URL（**别跳过**）
+
+把上一步打印的真实地址填进 `astro.config.mjs` 的 `SITE_URL`，然后再部署一次：
+
+```bash
+npm run deploy
+```
+
+不改的话 RSS 和 sitemap 里全是错的绝对地址，订阅器和搜索引擎会拿到打不开的链接。
+
+### 4. 接上 Git 自动部署（可选，但建议）
+
+Cloudflare 控制台 → Workers & Pages → 选中这个 Worker → Settings → Builds，
+连接 GitHub 仓库。构建设置：
+
+| 项 | 值 |
+| --- | --- |
+| 构建命令 | `npm run build` |
+| 部署命令 | `npx wrangler deploy` |
+| 根目录 | `/` |
+| Node 版本 | 22（`.nvmrc` 已写好；不生效就加环境变量 `NODE_VERSION=22`） |
+
+接上之后 `git push` 即部署，不用再手动跑 `npm run deploy`。
+
+> 控制台的菜单名称 Cloudflare 改得比较勤，按「Builds / 构建」这个关键词找即可。
+
+### 5. 自定义域名（买了域名之后）
+
+1. 域名 DNS 托管到 Cloudflare
+2. 控制台 → 这个 Worker → Settings → Domains & Routes → 添加自定义域
+3. 把 `astro.config.mjs` 的 `SITE_URL` 改成新域名，重新部署
+
+注意：Workers 的自定义域名**必须在 Cloudflare 托管的区域内**，域名放在别处只做 CNAME 是不支持的。
+
+### 6. 打开评论（Giscus）
+
+1. 仓库设为 public，Settings → General → Features 勾上 **Discussions**
+2. 给仓库装 [giscus app](https://github.com/apps/giscus)
+3. 打开 https://giscus.app ，填仓库名，选映射方式 **pathname**、
+   分类选 **Announcements**，页面下方会生成 `data-repo-id` 和 `data-category-id`
+4. 把四个值填进 `src/config.ts` 的 `GISCUS`，把 `enabled` 改成 `true`
+5. 重新部署
+
+### 7. 打开访问统计（可选）
+
+Cloudflare 控制台 → Web Analytics → 添加站点 → 拿到 token，
+填进 `src/config.ts` 的 `ANALYTICS.cfBeaconToken`，重新部署。
+免费、无 cookie、不拖慢页面。
+
+## 还没做的事
+
+- `SITE_URL` 是占位符，首次部署后必须按第 3 步改掉
+- Giscus 和 Web Analytics 都没开，按第 6、7 步走
+- `src/content/` 下四篇文章和 `works/example.md` 都是搭排版用的示例，
+  开始写自己的东西时删掉（`example.md` 是 `draft: true`，不会上线，留着当模板也行）
+- Lighthouse 跑分和 Firefox 实机复查没做过（开发机上没有浏览器），
+  部署后在真机上跑一遍

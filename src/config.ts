@@ -1,33 +1,34 @@
-/**
- * 站点身份信息。带 TODO 的都是占位符，等用户补充后替换。
- */
+/** 站点身份信息 */
 export const SITE = {
-  title: '我的博客', // TODO: 站名
-  description: '技术笔记、交互实验与随笔。', // TODO
-  author: 'Your Name', // TODO: 对外用的名字/ID
+  title: "Linner's Note",
+  description: '技术笔记、交互实验与随笔。',
+  author: 'Linner',
   // 首页名片区那句话，决定第一眼别人怎么记住你
-  tagline: '写点技术，做点实验，偶尔胡思乱想。', // TODO
+  tagline: '写点技术，做点实验，偶尔胡思乱想。',
   lang: 'zh-CN',
   postsPerPage: 10,
 } as const;
 
-/** TODO: 补充真实链接；留空的不会渲染 */
+/** 页脚社交链接。href 留空的不会渲染，想加就补一行 */
 export const SOCIALS = [
-  { name: 'GitHub', href: '', icon: 'github' },
+  { name: 'GitHub', href: 'https://github.com/LLLLLLer', icon: 'github' },
   { name: 'X', href: '', icon: 'x' },
   { name: 'Email', href: '', icon: 'mail' },
 ].filter((s) => s.href);
 
-/** Giscus 评论配置。TODO: 在 https://giscus.app 生成后填入 */
+/**
+ * Giscus 评论。需要：仓库公开 + 打开 Discussions + 装 giscus app，
+ * 然后去 https://giscus.app 生成下面四个值。详见 README 的部署章节。
+ */
 export const GISCUS = {
-  enabled: false, // 填好下面的字段后改成 true
-  repo: '', // 例: 'user/blog'
+  enabled: false, // 四个字段填好后改成 true
+  repo: '', // 例: 'LLLLLLer/blog'
   repoId: '',
   category: 'Announcements',
   categoryId: '',
 } as const;
 
-/** Cloudflare Web Analytics。TODO: 在 CF 面板拿 token */
+/** Cloudflare Web Analytics。在 CF 面板 → Web Analytics 拿 token 后填入 */
 export const ANALYTICS = { cfBeaconToken: '' } as const;
 
 /** 四个内容分区 */
