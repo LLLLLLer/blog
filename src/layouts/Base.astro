@@ -45,6 +45,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <script is:inline>
       (() => {
         const root = document.documentElement;
+        // 标记 JS 可用。滚动进场只在有 JS 时才先隐藏，否则内容永远揭不开
+        root.classList.add('js');
         if (root.dataset.theme === 'b') return; // B 是暗色原生，不参与切换
         const saved = localStorage.getItem('color-scheme');
         const dark = saved
@@ -94,17 +96,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     from { opacity: 0; transform: translateY(var(--reveal-shift)); }
   }
 
-  /* 滚动进场 */
+  /* 滚动进场。
+     只有确认 JS 可用（html.js）才先把元素藏起来 —— 否则 JS 挂掉/被拦截时
+     内容会永久不可见，这是进场动画最常见也最致命的写法错误。 */
   [data-reveal] {
-    opacity: 0;
-    transform: translateY(var(--reveal-shift));
     transition: opacity var(--motion-slow) var(--ease-out),
       transform var(--motion-slow) var(--ease-out);
     transition-delay: var(--reveal-delay, 0ms);
   }
-  [data-reveal][data-revealed] {
-    opacity: 1;
-    transform: none;
+  html.js [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    transform: translateY(var(--reveal-shift));
   }
 
   /* 代码块复制按钮 */

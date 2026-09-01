@@ -15,8 +15,22 @@ npm run check:font # 校验字体覆盖（build 时自动跑）
 npx astro check  # 类型检查
 ```
 
-`npm run dev` 会显示草稿（`draft: true`），构建到线上则会过滤掉。
-所以要看「有作品时首页长什么样」，用 `dev` 而不是 `preview`。
+### 做视觉评审时用 preview，不要用 dev
+
+```bash
+SHOW_DRAFTS=1 npm run build
+npx astro preview --host 127.0.0.1 --port 4321
+```
+
+原因：**dev 模式下 Astro 的 CSS 是以 `<script type="module" src="…css">` 的形式、
+经由 Vite 客户端注入的**，浏览器端 JS 一旦没跑起来（SSH 隧道、代理、拦截插件都可能），
+页面就会没有任何样式。生产构建里 CSS 是老老实实的 `<link rel="stylesheet">`，不依赖 JS。
+
+`SHOW_DRAFTS=1` 让草稿（`draft: true`）进构建，这样能看到「有作品时首页长什么样」。
+不加这个变量则和线上一致，草稿被过滤掉。
+
+远程服务器上看，本地开个 SSH 隧道：`ssh -L 4321:127.0.0.1:4321 <user>@<host>`，
+然后浏览器开 http://localhost:4321 。
 
 ## 三个候选
 
@@ -57,6 +71,9 @@ DPR 缩放、resize、滚出视口暂停 rAF、降级、卸载全在容器里，
 
 - `prefers-reduced-motion: reduce` → 全部时长归零，View Transitions 动画取消
 - 窄屏（≤767px）→ 位移进场归零，`[data-heavy-motion]` 元素（光标辉光、首页视觉引子）整体不渲染
+
+滚动进场只在 `html.js` 下才先隐藏元素（`js` 类由 head 里的内联脚本加上）。
+**不要写裸的 `[data-reveal] { opacity: 0 }`** —— JS 一旦没执行，内容就永久不可见。
 
 页面切换用 View Transitions。跨文档过渡目前 Chromium + Safari 18.2+ 原生支持，
 Firefox 跨文档尚未完成，MDN 标 "Limited availability" 非 Baseline，

@@ -4,8 +4,12 @@ import type { SectionId } from '../config';
 export type WritingSection = 'posts' | 'notes' | 'lab';
 export type AnyEntry = CollectionEntry<'posts' | 'notes' | 'lab'>;
 
+// dev 默认显示草稿；生产构建加 SHOW_DRAFTS=1 也可以显示，
+// 用于拿真实构建产物做视觉评审（比 dev 模式稳，不依赖 Vite 客户端）
+const showDrafts = import.meta.env.DEV || process.env.SHOW_DRAFTS === '1';
+
 const visible = <T extends { data: { draft?: boolean } }>(entries: T[]) =>
-  entries.filter((e) => import.meta.env.DEV || !e.data.draft);
+  entries.filter((e) => showDrafts || !e.data.draft);
 
 const byDateDesc = (a: AnyEntry, b: AnyEntry) =>
   b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
