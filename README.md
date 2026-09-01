@@ -95,19 +95,29 @@ Firefox 跨文档尚未完成，MDN 标 "Limited availability" 非 Baseline，
 ### 1. 推到 GitHub
 
 ```bash
-gh repo create LLLLLLer/blog --private --source=. --remote=origin --push
+gh repo create LLLLLLer/blog --public --source=. --remote=origin --push
 # 或者手动：在 GitHub 建空仓库后
 # git remote add origin git@github.com:LLLLLLer/blog.git && git push -u origin main
 ```
 
-评论要用 Giscus 的话仓库必须是 **public**（见下面第 5 步）。
+用 `--public`：Giscus 评论要求仓库公开（见下面第 6 步）。只想先私有也行，
+以后在仓库 Settings 里改成 public 再开评论。
 
 ### 2. 首次部署
 
 ```bash
-npx wrangler login     # 浏览器授权；在无浏览器的服务器上它会给出可复制的链接
-npm run deploy         # = npm run build && wrangler deploy
+npx wrangler login --device   # 见下方说明，远程服务器上必须加 --device
+npm run deploy                # = npm run build && wrangler deploy
 ```
+
+**`--device` 不能省。** 默认的 `wrangler login` 会在**服务器上**开一个
+`localhost:8976` 的回调服务等浏览器跳回来，而你的浏览器在自己电脑上，
+根本够不着那个端口，命令会一直卡着。`--device` 改用 OAuth 设备码流程：
+终端打印一个 URL 和一段验证码，你在自己电脑的浏览器打开、输码即可，
+不需要任何端口转发。
+
+（如果连交互都不方便，也可以在 Cloudflare 控制台建一个 API Token，
+用环境变量 `CLOUDFLARE_API_TOKEN=xxx npm run deploy` 直接部署，跳过登录。）
 
 部署完终端会打印真实地址，形如 `https://linners-note.<你的账号子域>.workers.dev`。
 
