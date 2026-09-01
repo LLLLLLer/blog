@@ -147,10 +147,27 @@ Cloudflare 控制台 → Workers & Pages → 选中这个 Worker → Settings �
 
 > 控制台的菜单名称 Cloudflare 改得比较勤，按「Builds / 构建」这个关键词找即可。
 
-### 5. 自定义域名（买了域名之后）
+### 5. 自定义域名
 
-1. 域名 DNS 托管到 Cloudflare
-2. 控制台 → 这个 Worker → Settings → Domains & Routes → 添加自定义域
+已接入 `linner.top`（域名注册在 Spaceship，DNS 托管在 Cloudflare）。
+`wrangler.jsonc` 的 `routes` 声明了自定义域名，deploy 时 wrangler 自动维护 DNS 记录。
+
+注意：配置 `routes` 后 workers.dev 路由会被自动禁用，
+原 `*.workers.dev` 地址返回 404。
+
+**www 跳转**：`www.linner.top` 有一条代理开启的 CNAME 指向 apex，
+外加一条 Cloudflare 动态重定向规则（zone → Rules → Single Redirects）：
+
+- 表达式 `(http.host eq "www.linner.top")`
+- 动作 301 → `concat("https://linner.top", http.request.uri.path)`，保留查询串
+
+跳转在 Cloudflare 边缘完成，不进 Worker，因此不产生 Worker 请求计费。
+只加 CNAME 而没有这条规则的话，www 会返回 **522**（Cloudflare 找不到后端）。
+
+### 换成别的域名
+
+1. 域名 DNS 托管到 Cloudflare（换 nameserver 即可，不用转注册商）
+2. 改 `wrangler.jsonc` 里 `routes` 的 `pattern`
 3. 把 `astro.config.mjs` 的 `SITE_URL` 改成新域名，重新部署
 
 注意：Workers 的自定义域名**必须在 Cloudflare 托管的区域内**，域名放在别处只做 CNAME 是不支持的。
