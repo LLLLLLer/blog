@@ -1,4 +1,7 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+// z 从 astro/zod 导入：astro:content 的 z 再导出已废弃，Astro 8 会移除。
+// 是同一个 zod 实例，行为不变。
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 /** 四个分区共用的基础字段 */

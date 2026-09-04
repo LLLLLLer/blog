@@ -60,6 +60,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     {ANALYTICS.cfBeaconToken && (
       <script
+        is:inline
         defer
         src="https://static.cloudflareinsights.com/beacon.min.js"
         data-cf-beacon={`{"token": "${ANALYTICS.cfBeaconToken}"}`}
